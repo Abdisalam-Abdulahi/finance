@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Create Account
+{% endblock %}
+
+{% block main %}
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-start">Symbol</th>
+                <th class="text-end">Shares</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">TOTAL</th>
+            </tr>
+        </thead>
+       <tbody>
+
+
+            {% set ns = namespace(total=0) %}
+
+            {% for stock, price in data %}
+            <tr>
+                <td class="text-start">{{ stock["symbol"] }}</td>
+                <td class="text-end">{{ stock["SUM(numberOfShares)"] }}</td>
+                <td class="text-end">{{ price | usd }}</td>
+                <td class="text-end">{{ (stock["SUM(numberOfShares)"] * price) | usd }}</td>
+                {% set value = stock["SUM(numberOfShares)"] * price %}
+                {% set ns.total = ns.total + value %}
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td class="border-0 fw-bold text-end" colspan="3">Cash</td>
+                <td class="border-0 text-end">{{ cash | usd }}</td>
+            </tr>
+            <tr>
+                <td class="border-0 fw-bold text-end" colspan="3">TOTAL</td>
+                <td class="border-0 w-bold text-end">{{ (ns.total + cash) | usd }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+{% endblock %}
