@@ -5,11 +5,13 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-import datetime
-now = str(datetime.datetime.now())
-
 
 from helpers import apology, login_required, lookup, usd
+
+
+import datetime
+now = datetime.datetime.now().replace(microsecond=0)
+now = str(now)
 
 # Configure application
 app = Flask(__name__)
@@ -54,9 +56,6 @@ def index():
                 lkup.append(result["price"])
         data = zip(stocks, lkup)
         return render_template("index.html", data=data, cash=remainingCash)
-        
-
-    return apology("TODO")
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -78,7 +77,11 @@ def buy():
         if not shares:
             return apology("Missing shares")
 
-        shares = int(shares)
+        try:
+            shares = int(shares)
+        except ValueError:
+            return apology("Invalid shares")
+        
         if shares < 0:
             return apology("shares must be positive integer")
         
@@ -96,7 +99,7 @@ def buy():
 
         if len(record) == 0 or True not in [symbol in x["symbol"] for x in record]:
             db.execute("INSERT INTO records (r_id, symbol, numberOfShares) VALUES(?, ?, ?)",
-                session["user_id"], symbol, shares)
+                       session["user_id"], symbol, shares)
             return redirect("/")
         elif True in [symbol in x["symbol"] for x in record]:
             db.execute("UPDATE records SET numberOfShares = numberOfShares + ? WHERE symbol = ? AND r_id = ?", 
@@ -104,14 +107,14 @@ def buy():
             return redirect("/")
     
     return redirect("/")
-    #return apology("TODO")
 
 
 @app.route("/history")
 @login_required
 def history():
     """Show history of transactions"""
-    return apology("TODO")
+    data = db.execute("SELECT * FROM purchase where user_id = ?", session["user_id"])
+    return render_template("history.html", data=data)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -178,8 +181,6 @@ def quote():
             return apology("Symbol does'nt exist")
         return render_template("quoted.html", name=result["name"], symbol=result["symbol"], price=result["price"])
 
-    #return apology("TODO")
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -187,7 +188,6 @@ def register():
     if request.method == "GET":
         return render_template("registration.html")
     
-
     elif request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -210,7 +210,6 @@ def register():
             db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", username, hash)
         except ValueError:
             return apology("username already exists")
-           
 
         # Query database for username
         rows = db.execute(
@@ -267,8 +266,3 @@ def sell():
                    session["user_id"], symbol, nshares, float(result["price"]), income, now, "-")
         
         return redirect("/")
-
-
-
-
-    return apology("TODO")

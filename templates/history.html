@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Create Account
+{% endblock %}
+
+{% block main %}
+
+    <main class="container py-5 text-center">
+            
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="text-start">Symbol</th>
+                <th class="text-end">Shares</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Transacted</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+
+    {% for raw in data %}
+    <tr>
+        <td class="text-start">{{ raw["symbol"] }}</td>
+        {% if raw["type"] == "-" %} 
+            <td class="text-end">{{ raw["type"] }}{{ raw["numberOfShares"] }}</td>
+        {% else %}
+            <td class="text-end">{{ raw["numberOfShares"] }}</td>
+        {% endif %}
+        <td class="text-end">{{ raw["pricePerShare"] | usd }}</td>
+        <td class="text-end">{{ raw["time"] }}</td>
+    </tr>
+    {% endfor %}
+
+        </tbody>
+    </table>
+
+    </main>
+
+{% endblock %}
